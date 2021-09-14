@@ -5,9 +5,9 @@
 set -e
 
 if [ -z "$DAPPSYS_PATH" ]; then
-  >&2 echo "dapp test-standalone: \$DAPPSYS_PATH must point to dappsys root"
-  >&2 echo "dapp test-standalone: containing at least ds-test/src/test.sol"
-  exit 1
+	echo >&2 "dapp test-standalone: \$DAPPSYS_PATH must point to dappsys root"
+	echo >&2 "dapp test-standalone: containing at least ds-test/src/test.sol"
+	exit 1
 fi
 
 tmp=$(mktemp -d)

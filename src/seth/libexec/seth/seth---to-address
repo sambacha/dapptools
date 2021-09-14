@@ -5,5 +5,5 @@ set -e
 [[ $1 ]] || set -- "$(cat)"
 hexdata=$(seth --to-hexdata "$@")
 [[ ${#hexdata} = 42 ]] ||
-seth --fail "${0##*/}: error: bad address: \`$hexdata'"
+	seth --fail "${0##*/}: error: bad address: \`$hexdata'"
 seth --to-checksum-address "$hexdata"

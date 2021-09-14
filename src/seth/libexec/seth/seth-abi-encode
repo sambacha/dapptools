@@ -8,5 +8,5 @@
 
 set -e
 
-x=$(seth calldata $@); # generate full calldata based on function signature
-echo "0x${x:10}" # slice off the function signature and only keep the encoded values
+x=$(seth calldata $@) # generate full calldata based on function signature
+echo "0x${x:10}"      # slice off the function signature and only keep the encoded values

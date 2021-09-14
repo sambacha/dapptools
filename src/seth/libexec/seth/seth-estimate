@@ -18,15 +18,15 @@ set -e
 [[ $2 ]] || seth --fail-usage "$0"
 
 if [[ $SETH_CREATE ]]; then
-  DATA=$(seth --to-hexdata "$1")
-  if [[ $2 ]]; then
-    args=$(seth calldata "${@:2}")
-    args=${args#0x}
-    DATA+=${args:8}
-  fi
+	DATA=$(seth --to-hexdata "$1")
+	if [[ $2 ]]; then
+		args=$(seth calldata "${@:2}")
+		args=${args#0x}
+		DATA+=${args:8}
+	fi
 else
-  TO=$(seth --to-address "$1")
-  DATA=$(seth calldata "${@:2}")
+	TO=$(seth --to-address "$1")
+	DATA=$(seth calldata "${@:2}")
 fi
 
 jshon+=(-n {})

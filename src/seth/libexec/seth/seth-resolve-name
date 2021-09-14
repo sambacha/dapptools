@@ -13,7 +13,7 @@ shopt -s extglob
 # verify chain ID
 chainid=$(seth chain-id)
 if [[ $chainid != @(1|3|4|5) ]]; then
-  seth --fail "${0##*/}: error: using chain ID $chainid, but ENS lookups are only supported for chain IDs 1, 3, 4, and 5"
+	seth --fail "${0##*/}: error: using chain ID $chainid, but ENS lookups are only supported for chain IDs 1, 3, 4, and 5"
 fi
 
 # get namehash

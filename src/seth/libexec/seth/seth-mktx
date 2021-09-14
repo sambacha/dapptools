@@ -10,30 +10,33 @@ set -e
 value=$(seth --to-wei "${ETH_VALUE:-0}")
 value=$(seth --to-hex "$value")
 if [[ $2 ]]; then
-  data=$(seth calldata "${@:2}")
+	data=$(seth calldata "${@:2}")
 fi
 
 args=(
-  --from "$(seth --to-address "$ETH_FROM")"
-  --nonce "${ETH_NONCE:-$(seth nonce "$ETH_FROM")}"
-  --chain-id "$(seth chain-id)"
-  --gas-price "${ETH_GAS_PRICE:-$(seth gas-price)}"
-  --gas-limit "${ETH_GAS:-200000}"
-  --value "$value"
-  --data "${data:-0x}"
+	--from "$(seth --to-address "$ETH_FROM")"
+	--nonce "${ETH_NONCE:-$(seth nonce "$ETH_FROM")}"
+	--chain-id "$(seth chain-id)"
+	--gas-price "${ETH_GAS_PRICE:-$(seth gas-price)}"
+	--gas-limit "${ETH_GAS:-200000}"
+	--value "$value"
+	--data "${data:-0x}"
 )
 
 if [[ $SETH_CREATE ]]; then
-  args+=(--create)
+	args+=(--create)
 else
-  args+=(--to "$(seth --to-address "$1")")
+	args+=(--to "$(seth --to-address "$1")")
 fi
 
 if [[ $ETH_PRIO_FEE ]]; then
-  args+=(--prio-fee "$ETH_PRIO_FEE")
+	args+=(--prio-fee "$ETH_PRIO_FEE")
 fi
 
 if [ -n "$ETH_PASSWORD" ]; then args+=(--passphrase-file "$ETH_PASSWORD"); fi
 
-tx=$([[ $SETH_VERBOSE ]] && set -x; ethsign tx "${args[@]}")
+tx=$(
+	[[ $SETH_VERBOSE ]] && set -x
+	ethsign tx "${args[@]}"
+)
 echo "$tx"

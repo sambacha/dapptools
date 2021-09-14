@@ -122,19 +122,19 @@ v,verbose            print additional debugging information
 set -e
 
 if ! [[ $SETH_INIT ]]; then
-  export SETH_INIT=1
-  # shellcheck source=/dev/null
-  [[ -e ~/.sethrc ]] && . ~/.sethrc
-  # shellcheck source=/dev/null
-  [[ -e $XDG_CONFIG_HOME/seth/sethrc ]] && . "$XDG_CONFIG_HOME"/seth/sethrc
-  # shellcheck source=/dev/null
-  [[ $(pwd) != ~ && -e .sethrc ]] && . .sethrc
+	export SETH_INIT=1
+	# shellcheck source=/dev/null
+	[[ -e ~/.sethrc ]] && . ~/.sethrc
+	# shellcheck source=/dev/null
+	[[ -e $XDG_CONFIG_HOME/seth/sethrc ]] && . "$XDG_CONFIG_HOME"/seth/sethrc
+	# shellcheck source=/dev/null
+	[[ $(pwd) != ~ && -e .sethrc ]] && . .sethrc
 fi
 
 if [[ $2 = --help ]]; then
-  exec "${0##*/}" help -- "$1"
+	exec "${0##*/}" help -- "$1"
 elif [[ $1 = -* ]] && command -v "${0##*/}-$1" &>/dev/null; then
-  exec "${0##*/}-$1" "${@:2}"
+	exec "${0##*/}-$1" "${@:2}"
 fi
 
 eval "$(git rev-parse --parseopt -- "$@" <<<"$OPTS" || echo exit $?)"
@@ -145,125 +145,188 @@ export SETH_STATUS=yes
 shopt -s extglob
 
 while [[ $1 ]]; do
-  case $1 in
-    --)              shift; break;;
+	case $1 in
+	--)
+		shift
+		break
+		;;
 
-    --rpc-host)      shift; export ETH_RPC_HOST=$1;;
-    --rpc-port)      shift; export ETH_RPC_PORT=$1;;
-    --rpc-url)       shift; export ETH_RPC_URL=$1;;
-    --rpc-accounts)         export ETH_RPC_ACCOUNTS=yes;;
-    --keystore)      shift; export ETH_KEYSTORE=$1;;
+	--rpc-host)
+		shift
+		export ETH_RPC_HOST=$1
+		;;
+	--rpc-port)
+		shift
+		export ETH_RPC_PORT=$1
+		;;
+	--rpc-url)
+		shift
+		export ETH_RPC_URL=$1
+		;;
+	--rpc-accounts) export ETH_RPC_ACCOUNTS=yes ;;
+	--keystore)
+		shift
+		export ETH_KEYSTORE=$1
+		;;
 
-    -C|--chain)      shift; export SETH_CHAIN=$1;;
+	-C | --chain)
+		shift
+		export SETH_CHAIN=$1
+		;;
 
-    -B|--block)      shift; export ETH_BLOCK=$1;;
-    -F|--from)       shift; export ETH_FROM=$(seth --to-address $1);;
-    -G|--gas)        shift; export ETH_GAS=$1;;
-    -P|--gas-price)  shift;
-      export ETH_GAS_PRICE=$(seth --to-wei ${1%gwei} ${1##*([0-9])});;
-    -T|--prio-fee)   shift;
-      export ETH_PRIO_FEE=$(seth --to-wei ${1%gwei} ${1##*([0-9])});;
-    -N|--nonce)      shift; export ETH_NONCE=$1;;
-    -V|--value)      shift; export ETH_VALUE=$1;;
-    -S|--password)   shift; export ETH_PASSWORD=$1;;
+	-B | --block)
+		shift
+		export ETH_BLOCK=$1
+		;;
+	-F | --from)
+		shift
+		export ETH_FROM=$(seth --to-address $1)
+		;;
+	-G | --gas)
+		shift
+		export ETH_GAS=$1
+		;;
+	-P | --gas-price)
+		shift
+		export ETH_GAS_PRICE=$(seth --to-wei ${1%gwei} ${1##*([0-9])})
+		;;
+	-T | --prio-fee)
+		shift
+		export ETH_PRIO_FEE=$(seth --to-wei ${1%gwei} ${1##*([0-9])})
+		;;
+	-N | --nonce)
+		shift
+		export ETH_NONCE=$1
+		;;
+	-V | --value)
+		shift
+		export ETH_VALUE=$1
+		;;
+	-S | --password)
+		shift
+		export ETH_PASSWORD=$1
+		;;
 
-       --state)      shift; export HEVM_STATE=$1;;
-       --timestamp)  shift; export HEVM_TIMESTAMP=$1;;
-       --debug)             export HEVM_DEBUG=yes;;
-       --trace)             export HEVM_TRACE=yes;;
-       --hevm)              export HEVM_EXEC=yes;;
-       --source)     shift; export DAPP_JSON=$1;;
-       --code)       shift; export HEVM_CODE=$1;;
+	--state)
+		shift
+		export HEVM_STATE=$1
+		;;
+	--timestamp)
+		shift
+		export HEVM_TIMESTAMP=$1
+		;;
+	--debug) export HEVM_DEBUG=yes ;;
+	--trace) export HEVM_TRACE=yes ;;
+	--hevm) export HEVM_EXEC=yes ;;
+	--source)
+		shift
+		export DAPP_JSON=$1
+		;;
+	--code)
+		shift
+		export HEVM_CODE=$1
+		;;
 
-    -D|--dir)        shift; export SETH_DIR=$1;;
+	-D | --dir)
+		shift
+		export SETH_DIR=$1
+		;;
 
-       --no-src)            export SETH_NOSRC=yes;;
+	--no-src) export SETH_NOSRC=yes ;;
 
-       --full)              export SETH_FULL_BLOCK=yes;;
+	--full) export SETH_FULL_BLOCK=yes ;;
 
-    -v|--verbose)           export SETH_VERBOSE=yes;;
+	-v | --verbose) export SETH_VERBOSE=yes ;;
 
-       --create)            export SETH_CREATE=yes;;
-       --guess)             export SETH_GUESS=yes;;
-       --status)            export SETH_STATUS=yes;;
-       --resend)            export SETH_RESEND=yes;;
+	--create) export SETH_CREATE=yes ;;
+	--guess) export SETH_GUESS=yes ;;
+	--status) export SETH_STATUS=yes ;;
+	--resend) export SETH_RESEND=yes ;;
 
-       --async)             export SETH_ASYNC=yes;;
-       --follow)            export SETH_FOLLOW=yes;;
-    -j|--json)              export SETH_JSON=yes;;
-       --id)         shift; export SETH_4BYTE_ID=$1;;
+	--async) export SETH_ASYNC=yes ;;
+	--follow) export SETH_FOLLOW=yes ;;
+	-j | --json) export SETH_JSON=yes ;;
+	--id)
+		shift
+		export SETH_4BYTE_ID=$1
+		;;
 
-    *) printf "${0##*/}: internal error: %q\\n" "$1"; exit 1
-  esac; shift
+	*)
+		printf "${0##*/}: internal error: %q\\n" "$1"
+		exit 1
+		;;
+	esac
+	shift
 done
 
 keystores=()
 
 if [[ $SETH_CHAIN ]]; then
 
-  case "$SETH_CHAIN" in
-    ethlive|mainnet)
-      eth_rpc_url=https://mainnet.infura.io/$INFURA_KEY
-      export ETHERSCAN_API_URL=https://api.etherscan.io/api
-      ;;
-    ropsten)
-      eth_rpc_url=https://$SETH_CHAIN.infura.io/$INFURA_KEY
-      export ETHERSCAN_API_URL=https://api-$SETH_CHAIN.etherscan.io/api
-      keystores=(
-        ~/{.ethereum,Library/Ethereum}/testnet/keystore/
-      )
-      ;;
-    kovan|rinkeby|goerli)
-      eth_rpc_url=https://$SETH_CHAIN.infura.io/$INFURA_KEY
-      export ETHERSCAN_API_URL=https://api-$SETH_CHAIN.etherscan.io/api
-      keystores=(
-        ~/{.ethereum,Library/Ethereum}/"$SETH_CHAIN"/keystore/
-        ~/{.local/share,Library/Application\ Support}/io.parity.ethereum/keys/"$SETH_CHAIN"/
-      )
-      ;;
-    optimism-mainnet)
-      eth_rpc_url=https://optimism-mainnet.infura.io/$INFURA_KEY
-      export ETHERSCAN_API_URL=https://api-optimistic.etherscan.io/api
-      ;;
-    optimism-kovan)
-      eth_rpc_url=https://optimism-kovan.infura.io/$INFURA_KEY
-      export ETHERSCAN_API_URL=https://api-kovan-optimistic.etherscan.io/api
-      ;;
-    arbitrum-mainnet)
-      eth_rpc_url=https://arbitrum-mainnet.infura.io/$INFURA_KEY
-      export ETHERSCAN_API_URL=https://api.arbiscan.io/api
-      ;;
-    bsctest)
-      eth_rpc_url=https://data-seed-prebsc-2-s1.binance.org:8545/
-      export ETHERSCAN_API_URL=https://api-testnet.bscscan.com/api
-      ;;
-    bsc)
-      eth_rpc_url=https://bsc-dataseed3.binance.org/
-      export ETHERSCAN_API_URL=https://api.bscscan.com/api
-      ;;
-    *)
-      echo >&2 "${0##*/}: error: unknown chain: \\'$SETH_CHAIN'"
-      exit 1
-  esac
+	case "$SETH_CHAIN" in
+	ethlive | mainnet)
+		eth_rpc_url=https://mainnet.infura.io/$INFURA_KEY
+		export ETHERSCAN_API_URL=https://api.etherscan.io/api
+		;;
+	ropsten)
+		eth_rpc_url=https://$SETH_CHAIN.infura.io/$INFURA_KEY
+		export ETHERSCAN_API_URL=https://api-$SETH_CHAIN.etherscan.io/api
+		keystores=(
+			~/{.ethereum,Library/Ethereum}/testnet/keystore/
+		)
+		;;
+	kovan | rinkeby | goerli)
+		eth_rpc_url=https://$SETH_CHAIN.infura.io/$INFURA_KEY
+		export ETHERSCAN_API_URL=https://api-$SETH_CHAIN.etherscan.io/api
+		keystores=(
+			~/{.ethereum,Library/Ethereum}/"$SETH_CHAIN"/keystore/
+			~/{.local/share,Library/Application\ Support}/io.parity.ethereum/keys/"$SETH_CHAIN"/
+		)
+		;;
+	optimism-mainnet)
+		eth_rpc_url=https://optimism-mainnet.infura.io/$INFURA_KEY
+		export ETHERSCAN_API_URL=https://api-optimistic.etherscan.io/api
+		;;
+	optimism-kovan)
+		eth_rpc_url=https://optimism-kovan.infura.io/$INFURA_KEY
+		export ETHERSCAN_API_URL=https://api-kovan-optimistic.etherscan.io/api
+		;;
+	arbitrum-mainnet)
+		eth_rpc_url=https://arbitrum-mainnet.infura.io/$INFURA_KEY
+		export ETHERSCAN_API_URL=https://api.arbiscan.io/api
+		;;
+	bsctest)
+		eth_rpc_url=https://data-seed-prebsc-2-s1.binance.org:8545/
+		export ETHERSCAN_API_URL=https://api-testnet.bscscan.com/api
+		;;
+	bsc)
+		eth_rpc_url=https://bsc-dataseed3.binance.org/
+		export ETHERSCAN_API_URL=https://api.bscscan.com/api
+		;;
+	*)
+		echo >&2 "${0##*/}: error: unknown chain: \\'$SETH_CHAIN'"
+		exit 1
+		;;
+	esac
 fi
 
 # If needed, set ETH_KEYSTORE to a comma-separated list
 if [[ ${#keystores[@]} -gt 0 ]]; then
-  keystore=$(printf ",%s" "${keystores[@]}")
-  keystore=${keystore:1}
-  ETH_KEYSTORE=${ETH_KEYSTORE:-$keystore}
+	keystore=$(printf ",%s" "${keystores[@]}")
+	keystore=${keystore:1}
+	ETH_KEYSTORE=${ETH_KEYSTORE:-$keystore}
 fi
 
 [[ -n $ETH_KEYSTORE ]] && export ETH_KEYSTORE
 export ETH_RPC_URL=${ETH_RPC_URL:-${eth_rpc_url:-${ETH_RPC_HOST:-http://127.0.0.1}:${ETH_RPC_PORT:-8545}}}
 
 if ! [ -x "$(command -v "${0##*/}-${1-help}")" ]; then
-    # look for approximate matches
-    echo >&2 "'$1' is not a seth command. See 'seth help'."
-    echo >&2
-    echo >&2 "Most similar commands:"
-    find "${0%seth}" -execdir echo {} ';' | agrep -1 "${0##*/}-${1-help}" >&2
-    exit 1
+	# look for approximate matches
+	echo >&2 "'$1' is not a seth command. See 'seth help'."
+	echo >&2
+	echo >&2 "Most similar commands:"
+	find "${0%seth}" -execdir echo {} ';' | agrep -1 "${0##*/}-${1-help}" >&2
+	exit 1
 fi
 
 "${0##*/}-${1-help}" "${@:2}"

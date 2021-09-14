@@ -5,9 +5,9 @@
 set -e
 [ $# = 3 ] || [ $# = 4 ] || token transfer --usage
 if [ $# = 3 ]; then
-  sig="transfer(address,uint)(bool)"
-  seth send "$1" "$sig" "$2" "$3"
+	sig="transfer(address,uint)(bool)"
+	seth send "$1" "$sig" "$2" "$3"
 else
-  sig="transferFrom(address,address,uint)(bool)"
-  seth send "$1" "$sig" "$4" "$2" "$3"
+	sig="transferFrom(address,address,uint)(bool)"
+	seth send "$1" "$sig" "$4" "$2" "$3"
 fi

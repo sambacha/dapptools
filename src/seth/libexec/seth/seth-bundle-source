@@ -10,38 +10,38 @@ set -e
 
 ETHERSCAN_SRC=$(seth etherscan-source "$1")
 
-SOLC_VERSION=$(jq '.CompilerVersion' <<< "$ETHERSCAN_SRC")
-SOLC_VERSION=${SOLC_VERSION/'"'}
-SOLC_VERSION=${SOLC_VERSION/v}
-SOLC_VERSION=${SOLC_VERSION/+*}
+SOLC_VERSION=$(jq '.CompilerVersion' <<<"$ETHERSCAN_SRC")
+SOLC_VERSION=${SOLC_VERSION/'"'/}
+SOLC_VERSION=${SOLC_VERSION/v/}
+SOLC_VERSION=${SOLC_VERSION/+*/}
 
-SOURCE="$(jq -r '.SourceCode' <<< "$ETHERSCAN_SRC" | tr -d '\r')"
+SOURCE="$(jq -r '.SourceCode' <<<"$ETHERSCAN_SRC" | tr -d '\r')"
 
 case "$SOURCE" in
-  \{*\})  # standard-json
-    # for some reason etherscan surrounds the actual json with '{}'
-    SOURCE="${SOURCE/#\{\{/\{}"
-    SOURCE="${SOURCE/%\}\}/\}}"
+\{*\}) # standard-json
+	# for some reason etherscan surrounds the actual json with '{}'
+	SOURCE="${SOURCE/#\{\{/\{}"
+	SOURCE="${SOURCE/%\}\}/\}}"
 
-    # write all source files in the local directory
-    for x in $(echo "$SOURCE" | jq '.sources | keys | .[]' -r); do
-        mkdir -p "$(dirname "$x")"
-        echo "$SOURCE" | jq ".sources.\"$x\".content" -r > $x
-    done;
-    export DAPP_SOLC_JSON="$SOURCE"
-    seth --use solc:"${SOLC_VERSION}" solc
-    ;;
+	# write all source files in the local directory
+	for x in $(echo "$SOURCE" | jq '.sources | keys | .[]' -r); do
+		mkdir -p "$(dirname "$x")"
+		echo "$SOURCE" | jq ".sources.\"$x\".content" -r >$x
+	done
+	export DAPP_SOLC_JSON="$SOURCE"
+	seth --use solc:"${SOLC_VERSION}" solc
+	;;
 
-  *)  # flattened file
-    NAME="$(jq -r '.ContractName' <<< "$ETHERSCAN_SRC")"
-    FILE="${SETH_DIR:-.}/${NAME}.sol"
-    echo "$SOURCE" > "$FILE"
-    OPT=$(jq -r '.OptimizationUsed' <<< "$ETHERSCAN_SRC")
-    if [[ "$OPT" -ne  0 ]]; then
-        RUNS=$(jq -r '.Runs' <<< "$ETHERSCAN_SRC")
-        export DAPP_SOLC_OPTIMIZE=true
-        export DAPP_SOLC_OPTIMIZE_RUNS=$RUNS
-    fi
-    seth --use solc:"${SOLC_VERSION}" solc "$FILE"
-    ;;
+*) # flattened file
+	NAME="$(jq -r '.ContractName' <<<"$ETHERSCAN_SRC")"
+	FILE="${SETH_DIR:-.}/${NAME}.sol"
+	echo "$SOURCE" >"$FILE"
+	OPT=$(jq -r '.OptimizationUsed' <<<"$ETHERSCAN_SRC")
+	if [[ "$OPT" -ne 0 ]]; then
+		RUNS=$(jq -r '.Runs' <<<"$ETHERSCAN_SRC")
+		export DAPP_SOLC_OPTIMIZE=true
+		export DAPP_SOLC_OPTIMIZE_RUNS=$RUNS
+	fi
+	seth --use solc:"${SOLC_VERSION}" solc "$FILE"
+	;;
 esac

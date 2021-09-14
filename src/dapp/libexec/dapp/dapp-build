@@ -13,18 +13,19 @@
 set -e
 
 info() {
-  while [[ $# -gt 0 ]]; do
-    opt=$1; shift
-    case $opt in
-      -*)
-        FLAGS=$opt;
-        ;;
-      *)
-        ARGS=$opt;
-        ;;
-    esac
-  done
-  echo >&2 "$FLAGS" "${0##*/}: $ARGS"
+	while [[ $# -gt 0 ]]; do
+		opt=$1
+		shift
+		case $opt in
+		-*)
+			FLAGS=$opt
+			;;
+		*)
+			ARGS=$opt
+			;;
+		esac
+	done
+	echo >&2 "$FLAGS" "${0##*/}: $ARGS"
 }
 
 cd "$DAPP_ROOT"
@@ -33,21 +34,24 @@ cd "$DAPP_ROOT"
 export SOLC=${DAPP_SOLC:-solc}
 
 if [ "$DAPP_LINK_TEST_LIBRARIES" = 1 ]; then
-    sender=0x00a329c0648769a73afac7f9381e08fb43dbea72
-    nonce=48576
-    mapfile -t libraries < <(dapp --find-libraries)
+	sender=0x00a329c0648769a73afac7f9381e08fb43dbea72
+	nonce=48576
+	mapfile -t libraries < <(dapp --find-libraries)
 
-    if [[ ${#libraries[@]} -gt 0 ]]; then
+	if [[ ${#libraries[@]} -gt 0 ]]; then
 
-        info "building with linked libraries"
-        for lib in "${libraries[@]}"; do
-            address=$(dapp address "$sender" "$nonce")
-            links+=" $lib:$address"
-            ((nonce++))
-        done
-    fi
+		info "building with linked libraries"
+		for lib in "${libraries[@]}"; do
+			address=$(dapp address "$sender" "$nonce")
+			links+=" $lib:$address"
+			((nonce++))
+		done
+	fi
 else
-    (set -x; dapp clean)
+	(
+		set -x
+		dapp clean
+	)
 fi
 
 export -f info
@@ -56,23 +60,23 @@ export DAPP_LIBRARIES=${DAPP_LIBRARIES-"$links"}
 mkdir -p "$DAPP_OUT"
 
 if [[ -z "$DAPP_BUILD_LEGACY" && -z "$DAPP_BUILD_EXTRACT" ]]; then
-    if [[ "$SOLC_FLAGS" ]]; then
-        info "warning: SOLC_FLAGS are only recognized using '--legacy'"
-        info "consider using --optimize or a custom standard-json instead."
-    fi
-    if [[ "$DAPP_STANDARD_JSON" ]]; then
-        "$SOLC" --allow-paths . --standard-json < "$DAPP_STANDARD_JSON" > "$DAPP_JSON"
-    else
-        dapp mk-standard-json | "$SOLC" --standard-json --allow-paths . > "$DAPP_JSON"
-    fi
+	if [[ "$SOLC_FLAGS" ]]; then
+		info "warning: SOLC_FLAGS are only recognized using '--legacy'"
+		info "consider using --optimize or a custom standard-json instead."
+	fi
+	if [[ "$DAPP_STANDARD_JSON" ]]; then
+		"$SOLC" --allow-paths . --standard-json <"$DAPP_STANDARD_JSON" >"$DAPP_JSON"
+	else
+		dapp mk-standard-json | "$SOLC" --standard-json --allow-paths . >"$DAPP_JSON"
+	fi
 
-    # pipe errors to stderr
-    jq -r 'if .errors then .errors | map(."formattedMessage") | @sh else empty end' "$DAPP_JSON" \
-        | sed -e "s/' //g" -e "s/'//g" 1>&2
-    # if sources is empty, the compilation failed
-    [[ $(jq -r '.sources' "$DAPP_JSON") = "null" ||  $(jq -r '.sources' "$DAPP_JSON") = {} ]] && exit 1 || exit 0
+	# pipe errors to stderr
+	jq -r 'if .errors then .errors | map(."formattedMessage") | @sh else empty end' "$DAPP_JSON" |
+		sed -e "s/' //g" -e "s/'//g" 1>&2
+	# if sources is empty, the compilation failed
+	[[ $(jq -r '.sources' "$DAPP_JSON") = "null" || $(jq -r '.sources' "$DAPP_JSON") = {} ]] && exit 1 || exit 0
 
 else
-    info "warning: legacy builds are deprecated and might not work with other dapp commands"
-    dapp build-legacy
+	info "warning: legacy builds are deprecated and might not work with other dapp commands"
+	dapp build-legacy
 fi

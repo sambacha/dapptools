@@ -26,26 +26,26 @@ have() { command -v "$1" >/dev/null; }
 cd "$DAPP_ROOT"
 
 have hevm || {
-  echo >&2 "${0##*/}: error: \`hevm' not found"
-  echo >&2 "${0##*/}: error: please install it and try again"
-  exit 1
+	echo >&2 "${0##*/}: error: \`hevm' not found"
+	echo >&2 "${0##*/}: error: please install it and try again"
+	exit 1
 }
 
 export DAPP_LINK_TEST_LIBRARIES=${DAPP_LINK_TEST_LIBRARIES-1}
 
-if ! [[ $DAPP_SKIP_BUILD ]] ; then
-  dapp build || exit
+if ! [[ $DAPP_SKIP_BUILD ]]; then
+	dapp build || exit
 fi
 
 if [ "$DAPP_VERBOSE" ]; then set -x; fi
 
 opts=$(dapp --hevm-opts "$0" "$@")
 
-if [ "$DAPP_LINK_TEST_LIBRARIES" = 1 ] ; then
-    state=$(dapp --make-library-state)
-    opts+=("--state ${state}")
-    function clean() { rm -rf "$state"; }
-    trap clean EXIT
+if [ "$DAPP_LINK_TEST_LIBRARIES" = 1 ]; then
+	state=$(dapp --make-library-state)
+	opts+=("--state ${state}")
+	function clean() { rm -rf "$state"; }
+	trap clean EXIT
 fi
 
 # make sure git commits succeed

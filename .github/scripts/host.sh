@@ -1,14 +1,14 @@
 #! /bin/bash
 
 if [ -z ${PREFIX+x} ]; then
-  export PREFIX="$HOME/.local"
+	export PREFIX="$HOME/.local"
 fi
 
 if [ "$HOST_OS" = "Linux" ]; then
-  EXT=".a"
+	EXT=".a"
 elif [ "$HOST_OS" = "macOS" ]; then
-  EXT=".dylib"
+	EXT=".dylib"
 else
-  echo "unrecognized host"
-  exit 1
+	echo "unrecognized host"
+	exit 1
 fi

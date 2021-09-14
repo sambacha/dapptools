@@ -15,7 +15,7 @@ RUNS=${DAPP_SOLC_OPTIMIZE_RUNS:-200}
 SOLC=${DAPP_SOLC:-solc}
 
 if [[ -z "$DAPP_SOLC_JSON" && -z "$1" ]]; then
-  seth --fail "must provide either .sol input file or DAPP_SOLC_JSON standard json"
+	seth --fail "must provide either .sol input file or DAPP_SOLC_JSON standard json"
 fi
 
 # default compiler settings, unless provided
@@ -30,7 +30,7 @@ JSON="${DAPP_SOLC_JSON:-$(jq -n '{}
 
 # regardless of the input we override the outputSelection to ensure
 # we have what hevm wants
-JSON="$(<<<"$JSON" jq '.
+JSON="$(jq <<<"$JSON" '.
   | .settings.outputSelection["*"]["*"]=[
       "metadata",
       "evm.bytecode",
@@ -48,5 +48,7 @@ JSON="$(<<<"$JSON" jq '.
   | .settings.outputSelection["*"][""] = ["ast"]
   ')"
 
-( [[ $SETH_VERBOSE ]] && set -x;
-  echo "$JSON" | $SOLC --standard-json --allow-paths "$(realpath $1)" | jq . )
+(
+	[[ $SETH_VERBOSE ]] && set -x
+	echo "$JSON" | $SOLC --standard-json --allow-paths "$(realpath $1)" | jq .
+)

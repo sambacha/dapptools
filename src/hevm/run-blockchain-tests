@@ -7,8 +7,8 @@ set -e
 HEVM=${HEVM:-hevm}
 
 if [[ "$#" -lt 1 ]]; then
-  echo >&2 "usage: $(basename "$0") <tests-dir>"
-  exit 1
+	echo >&2 "usage: $(basename "$0") <tests-dir>"
+	exit 1
 fi
 
 tests=$1
@@ -17,8 +17,8 @@ match=$3
 skip=$4
 timeout=${5:-10}
 
-_html () {
-cat <<.
+_html() {
+	cat <<.
 <!doctype html>
 <title>hevm test results</title>
 <style>
@@ -80,71 +80,73 @@ $(echo $passed)
 
 shopt -s nocasematch
 {
-  cd "$tests"
-  for x in BlockchainTests/GeneralStateTests/*/*; do
-    if [ -d $x ]; then
-      for y in $x/*; do
-        if [[ $y =~ .*$match.* ]] && [[ -n $skip && $y =~ .*$skip.* ]]; then
-          for job in $(<$y jq '.|keys[]' -r); do
-            echo -n "$job " ; echo "skip"
-          done
-        elif [[ $y =~ .*$match.* ]]; then
-          set +e
-          "$HEVM" bc-test --file $y --timeout $timeout 2>&1
-          set -e
-        fi
-      done
-    else
-      if [[ $x =~ .*$match.* ]] && [[ -n $skip && $x =~ .*$skip.* ]]; then
-        for job in $(<$x jq '.|keys[]' -r); do
-          echo -n "$job " ; echo "skip"
-        done
-      elif [[ $x =~ .*$match.* ]]; then
-        set +e
-        "$HEVM" bc-test --file $x --timeout $timeout 2>&1
-        set -e
-      fi
-    fi
-  done
+	cd "$tests"
+	for x in BlockchainTests/GeneralStateTests/*/*; do
+		if [ -d $x ]; then
+			for y in $x/*; do
+				if [[ $y =~ .*$match.* ]] && [[ -n $skip && $y =~ .*$skip.* ]]; then
+					for job in $(jq <$y '.|keys[]' -r); do
+						echo -n "$job "
+						echo "skip"
+					done
+				elif [[ $y =~ .*$match.* ]]; then
+					set +e
+					"$HEVM" bc-test --file $y --timeout $timeout 2>&1
+					set -e
+				fi
+			done
+		else
+			if [[ $x =~ .*$match.* ]] && [[ -n $skip && $x =~ .*$skip.* ]]; then
+				for job in $(jq <$x '.|keys[]' -r); do
+					echo -n "$job "
+					echo "skip"
+				done
+			elif [[ $x =~ .*$match.* ]]; then
+				set +e
+				"$HEVM" bc-test --file $x --timeout $timeout 2>&1
+				set -e
+			fi
+		fi
+	done
 } | {
-  while read test outcome; do
-    echo >&2 "$test $outcome"
-    row="<tr><td class=testcase>$test<td>$outcome"
-    row+=$'\n'
-    case $outcome in
-      ok)          passed+=$row ;;
-      bad-balance) balancefailed+=$row ;;
-      bad-nonce)   noncefailed+=$row ;;
-      bad-storage) storagefailed+=$row ;;
-      timeout)     timeouts+=$row ;;
-      skip)        skipped+=$row ;;
-      *)           failed+=$row ;;
-    esac
-  done
+	while read test outcome; do
+		echo >&2 "$test $outcome"
+		row="<tr><td class=testcase>$test<td>$outcome"
+		row+=$'\n'
+		case $outcome in
+		ok) passed+=$row ;;
+		bad-balance) balancefailed+=$row ;;
+		bad-nonce) noncefailed+=$row ;;
+		bad-storage) storagefailed+=$row ;;
+		timeout) timeouts+=$row ;;
+		skip) skipped+=$row ;;
+		*) failed+=$row ;;
+		esac
+	done
 
-  sum () { echo -ne "$1" | wc -l | awk '{print $1}'; }
+	sum() { echo -ne "$1" | wc -l | awk '{print $1}'; }
 
-  npass=$(sum "$passed")
-  nbal=$(sum "$balancefailed")
-  nnon=$(sum "$noncefailed")
-  nstr=$(sum "$storagefailed")
-  nfail=$(sum "$failed")
-  ntime=$(sum "$timeouts")
-  nskip=$(sum "$skipped")
+	npass=$(sum "$passed")
+	nbal=$(sum "$balancefailed")
+	nnon=$(sum "$noncefailed")
+	nstr=$(sum "$storagefailed")
+	nfail=$(sum "$failed")
+	ntime=$(sum "$timeouts")
+	nskip=$(sum "$skipped")
 
-  echo >&2 "passed: $npass"
-  echo >&2 "bad-balance: $nbal"
-  echo >&2 "bad-nonce: $nnon"
-  echo >&2 "bad-storage: $nstr"
-  echo >&2 "failed: $nfail"
-  echo >&2 "timeout: $ntime"
-  echo >&2 "skipped: $nskip"
+	echo >&2 "passed: $npass"
+	echo >&2 "bad-balance: $nbal"
+	echo >&2 "bad-nonce: $nnon"
+	echo >&2 "bad-storage: $nstr"
+	echo >&2 "failed: $nfail"
+	echo >&2 "timeout: $ntime"
+	echo >&2 "skipped: $nskip"
 
-  if [[ $html == "True" ]]; then
-    _html
-  fi
+	if [[ $html == "True" ]]; then
+		_html
+	fi
 
-  nbad=$(($nbal + $nnon + $nstr + $nfail))
+	nbad=$(($nbal + $nnon + $nstr + $nfail))
 
-  [[ $nbad -gt 0 ]] && exit 1 || exit 0
+	[[ $nbad -gt 0 ]] && exit 1 || exit 0
 }

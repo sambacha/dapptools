@@ -4,5 +4,5 @@
 set -e
 [[ $1 ]] || seth --fail-usage "$0"
 seth-logs-"${ETH_LOGS_API:-rpc}" \
-"$(seth --to-address "$1")" \
-"${ETH_BLOCK-earliest}" "$2" "$3"
+	"$(seth --to-address "$1")" \
+	"${ETH_BLOCK-earliest}" "$2" "$3"

@@ -5,6 +5,9 @@
 ###
 ### Easily do things with your Ethereum tokens.
 set -e
-[[ $2 = --help  ]] && exec token-help "$1"
-[[ $2 = --usage ]] && { token-help "$1" >&2; exit 1; }
+[[ $2 = --help ]] && exec token-help "$1"
+[[ $2 = --usage ]] && {
+	token-help "$1" >&2
+	exit 1
+}
 token-"${1-help}" "${@:2}"

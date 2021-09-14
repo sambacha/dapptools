@@ -1,0 +1,3 @@
+#!/bin/bash
+stack || exit 1 && echo "Requirement: Stack not found"
+cd src/hevm && stack build --ghc-options="-Werror" --extra-include-dirs=$HOME/.local/include --extra-lib-dirs=$HOME/.local/lib --only-dependencies && cd ../..

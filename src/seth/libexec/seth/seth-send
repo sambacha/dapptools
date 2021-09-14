@@ -22,26 +22,26 @@ set -e
 [[ $1 ]] || seth --fail-usage "$0"
 
 [[ $ETH_FROM ]] ||
-seth --fail "${0##*/}: error: \`ETH_FROM' not set; send from which account?"
+	seth --fail "${0##*/}: error: \`ETH_FROM' not set; send from which account?"
 [[ $ETH_GAS ]] ||
-echo >&2 "${0##*/}: warning: \`ETH_GAS' not set; using default gas amount"
+	echo >&2 "${0##*/}: warning: \`ETH_GAS' not set; using default gas amount"
 if [[ $SETH_RESEND ]]; then
-  nonce=$(seth nonce "$ETH_FROM")
-  export ETH_NONCE=$nonce
+	nonce=$(seth nonce "$ETH_FROM")
+	export ETH_NONCE=$nonce
 fi
 
 if [[ $SETH_CREATE ]]; then
-  DATA=$(seth --to-hexdata "$1")
-  if [[ $2 ]]; then
-    args=$(seth calldata "${@:2}")
-    args=${args#0x}
-    DATA+=${args:8}
-  fi
+	DATA=$(seth --to-hexdata "$1")
+	if [[ $2 ]]; then
+		args=$(seth calldata "${@:2}")
+		args=${args#0x}
+		DATA+=${args:8}
+	fi
 else
-  TO=$(seth --to-address "$1")
-  if [[ $2 ]]; then
-    DATA=$(seth calldata "${@:2}")
-  fi
+	TO=$(seth --to-address "$1")
+	if [[ $2 ]]; then
+		DATA=$(seth calldata "${@:2}")
+	fi
 fi
 
 jshon+=(-n {})
@@ -52,20 +52,20 @@ jshon+=($(seth --send-params))
 jshon+=(-i append)
 
 function signAndSend() {
-  tx=$(seth mktx "$TO" "$DATA")
-  tx=$(seth publish "$tx")
+	tx=$(seth mktx "$TO" "$DATA")
+	tx=$(seth publish "$tx")
 }
 
 if [[ -z $ETH_RPC_ACCOUNTS ]]; then
-  signAndSend
+	signAndSend
 elif ethsign ls | grep -q $ETH_FROM; then
-  signAndSend
+	signAndSend
 else
-  tx=$(seth rpc eth_sendTransaction -- "${jshon[@]}")
+	tx=$(seth rpc eth_sendTransaction -- "${jshon[@]}")
 fi
 
 [[ $tx =~ ^0x0*$ ]] &&
-seth --fail "${0##*/}: error: bad tx hash: $tx; account locked?"
+	seth --fail "${0##*/}: error: bad tx hash: $tx; account locked?"
 
 [[ $SETH_ASYNC = yes ]] && exec echo "$tx"
 
@@ -77,16 +77,16 @@ number=$(SETH_TICK=true seth receipt "$tx" blockNumber)
 echo >&2
 
 if [[ $SETH_STATUS && ($(seth receipt "$tx" status) -eq 0) ]]; then
-  echo >&2 "${0##*/}: Transaction failed."
-  seth >&2 receipt "$tx"
-  exit 1
+	echo >&2 "${0##*/}: Transaction failed."
+	seth >&2 receipt "$tx"
+	exit 1
 else
-  echo >&2 "${0##*/}: Transaction included in block $number."
+	echo >&2 "${0##*/}: Transaction included in block $number."
 fi
 
 [[ $TO ]] || exec seth receipt "$tx" contractAddress
 
 if [[ $SETH_GUESS ]]; then
-  echo >&2 "${0##*/}: warning: return value may be inaccurate"
-  seth -B "$((number - 1))" call "$TO" "${@:2}"
+	echo >&2 "${0##*/}: warning: return value may be inaccurate"
+	seth -B "$((number - 1))" call "$TO" "${@:2}"
 fi
