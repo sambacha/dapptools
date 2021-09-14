@@ -4,6 +4,12 @@
 set -e
 dapp --sanity "$0"
 for x; do
-  (set -x; git rm -r "lib/$x")
-  (set -x; git commit -m "dapp uninstall $x")
+	(
+		set -x
+		git rm -r "lib/$x"
+	)
+	(
+		set -x
+		git commit -m "dapp uninstall $x"
+	)
 done

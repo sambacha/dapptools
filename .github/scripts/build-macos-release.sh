@@ -1,20 +1,18 @@
 #!/bin/bash
 set -eux
 
-add_rpath()
-{
-    BINARY="$1"
-    install_name_tool -add_rpath "@executable_path/." "$BINARY"
+add_rpath() {
+	BINARY="$1"
+	install_name_tool -add_rpath "@executable_path/." "$BINARY"
 }
 
-fix_path()
-{
-    BINARY="$1"
-    MATCH="$2"
-    NEW="$3"
-    OLD=$(otool -L "$BINARY" | grep "$MATCH" | awk '{print $1}')
-    install_name_tool -change "$OLD" "$NEW" "$BINARY"
-    cp -n "$OLD" "$(dirname "$BINARY")/$(basename "$NEW")" || true
+fix_path() {
+	BINARY="$1"
+	MATCH="$2"
+	NEW="$3"
+	OLD=$(otool -L "$BINARY" | grep "$MATCH" | awk '{print $1}')
+	install_name_tool -change "$OLD" "$NEW" "$BINARY"
+	cp -n "$OLD" "$(dirname "$BINARY")/$(basename "$NEW")" || true
 }
 
 BUILD="$(mktemp -d)/hevm"

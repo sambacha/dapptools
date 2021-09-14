@@ -50,7 +50,6 @@
 ### load=name          start from a previously saved snapshot
 ### dir=directory      testnet directory
 
-
 OPTS="dapp [<options>] <command> [<args>]
 dapp <command> --help
 --
@@ -102,11 +101,11 @@ dir=directory      testnet directory
 set -e
 
 if ! [[ $DAPP_INIT ]]; then
-  export DAPP_INIT=1
-  # shellcheck source=/dev/null
-  [[ -e ~/.dapprc ]] && . ~/.dapprc
-  # shellcheck source=/dev/null
-  [[ $(pwd) != ~ && -e .dapprc ]] && . .dapprc
+	export DAPP_INIT=1
+	# shellcheck source=/dev/null
+	[[ -e ~/.dapprc ]] && . ~/.dapprc
+	# shellcheck source=/dev/null
+	[[ $(pwd) != ~ && -e .dapprc ]] && . .dapprc
 fi
 
 export DAPP_SRC=${DAPP_SRC-src}
@@ -117,78 +116,148 @@ export DAPP_ROOT=${DAPP_ROOT-.}
 export DAPP_REMAPPINGS=${DAPP_REMAPPINGS-"$(dapp-remappings)"}
 
 if [[ $2 = --help ]]; then
-  exec "${0##*/}" help -- "$1"
+	exec "${0##*/}" help -- "$1"
 elif [[ $DAPP_SOLC_VERSION ]]; then
-  v=$DAPP_SOLC_VERSION
-  unset DAPP_SOLC_VERSION
-  exec "${0##*/}---use" "solc:$v" "${@:1}"
+	v=$DAPP_SOLC_VERSION
+	unset DAPP_SOLC_VERSION
+	exec "${0##*/}---use" "solc:$v" "${@:1}"
 elif [[ $1 = -* ]] && command -v "${0##*/}-$1" &>/dev/null; then
-  exec "${0##*/}-$1" "${@:2}"
+	exec "${0##*/}-$1" "${@:2}"
 fi
 
-fail () {
-  echo >&2 "error: $1" && echo >&2
-  exit 1
+fail() {
+	echo >&2 "error: $1" && echo >&2
+	exit 1
 }
 
 eval "$(git rev-parse --parseopt -- "$@" <<<"$OPTS" || echo exit $?)"
 
 shopt -s extglob
 
-
 while [[ $1 ]]; do
-  case $1 in
-    --)                shift; break;;
-    --extract)                export DAPP_BUILD_EXTRACT=1;;
-    --optimize)               export DAPP_BUILD_OPTIMIZE=1;;
-    --legacy)                 export DAPP_BUILD_LEGACY=1;;
+	case $1 in
+	--)
+		shift
+		break
+		;;
+	--extract) export DAPP_BUILD_EXTRACT=1 ;;
+	--optimize) export DAPP_BUILD_OPTIMIZE=1 ;;
+	--legacy) export DAPP_BUILD_LEGACY=1 ;;
 
-    -m|--match)        shift; export DAPP_TEST_MATCH=$1;;
-    -v|--verbose)             export DAPP_TEST_VERBOSITY=1;;
-    --cov-match)       shift; export DAPP_TEST_COV_MATCH=$1;;
-    --verbosity)       shift; export DAPP_TEST_VERBOSITY=$1;;
-    --fuzz-runs)       shift; export DAPP_TEST_FUZZ_RUNS=$1;;
-    --depth)           shift; export DAPP_TEST_DEPTH=$1;;
+	-m | --match)
+		shift
+		export DAPP_TEST_MATCH=$1
+		;;
+	-v | --verbose) export DAPP_TEST_VERBOSITY=1 ;;
+	--cov-match)
+		shift
+		export DAPP_TEST_COV_MATCH=$1
+		;;
+	--verbosity)
+		shift
+		export DAPP_TEST_VERBOSITY=$1
+		;;
+	--fuzz-runs)
+		shift
+		export DAPP_TEST_FUZZ_RUNS=$1
+		;;
+	--depth)
+		shift
+		export DAPP_TEST_DEPTH=$1
+		;;
 
-    --smttimeout)      shift; export DAPP_TEST_SMTTIMEOUT=$1;;
-    --solver)          shift; export DAPP_TEST_SOLVER=$1;;
-    --max-iterations)  shift; export DAPP_TEST_MAX_ITERATIONS=$1;;
-    --smtdebug)               export DAPP_TEST_SMTDEBUG=1;;
-    --coverage)               export DAPP_TEST_COVERAGE=1;;
+	--smttimeout)
+		shift
+		export DAPP_TEST_SMTTIMEOUT=$1
+		;;
+	--solver)
+		shift
+		export DAPP_TEST_SOLVER=$1
+		;;
+	--max-iterations)
+		shift
+		export DAPP_TEST_MAX_ITERATIONS=$1
+		;;
+	--smtdebug) export DAPP_TEST_SMTDEBUG=1 ;;
+	--coverage) export DAPP_TEST_COVERAGE=1 ;;
 
-    --replay)          shift; export DAPP_TEST_REPLAY=$1;;
-    --cache)           shift; export DAPP_TEST_CACHE=$1;;
-    --ffi)                    export DAPP_TEST_FFI=1;;
-    --rpc-url)         shift; export HEVM_RPC=yes; export ETH_RPC_URL=$1;;
-    --rpc-block)       shift; export HEVM_RPC=yes; export DAPP_TEST_NUMBER=$1;;
-    --rpc)             [ -n "$ETH_RPC_URL" ] || fail "ETH_RPC_URL not set.";
-       export HEVM_RPC=yes;;
+	--replay)
+		shift
+		export DAPP_TEST_REPLAY=$1
+		;;
+	--cache)
+		shift
+		export DAPP_TEST_CACHE=$1
+		;;
+	--ffi) export DAPP_TEST_FFI=1 ;;
+	--rpc-url)
+		shift
+		export HEVM_RPC=yes
+		export ETH_RPC_URL=$1
+		;;
+	--rpc-block)
+		shift
+		export HEVM_RPC=yes
+		export DAPP_TEST_NUMBER=$1
+		;;
+	--rpc)
+		[ -n "$ETH_RPC_URL" ] || fail "ETH_RPC_URL not set."
+		export HEVM_RPC=yes
+		;;
 
-    --verify)                 export DAPP_VERIFY_CONTRACT=yes;;
+	--verify) export DAPP_VERIFY_CONTRACT=yes ;;
 
-    --async)                  export DAPP_ASYNC=yes;;
+	--async) export DAPP_ASYNC=yes ;;
 
-    --rpc-port)        shift; export DAPP_TESTNET_RPC_PORT=$1;;
-    --rpc-addr)        shift; export DAPP_TESTNET_RPC_ADDRESS=$1;;
-    --chain-id)        shift; export DAPP_TESTNET_CHAINID=$1;;
-    --period)          shift; export DAPP_TESTNET_PERIOD=$1;;
-    --accounts)        shift; export DAPP_TESTNET_ACCOUNTS=$(($1 - 1));;
-    --save)            shift; export DAPP_TESTNET_SAVE=$1;;
-    --load)            shift; export DAPP_TESTNET_LOAD=$1;;
-    --dir)             shift; export DAPP_TESTNET_gethdir=$1;;
+	--rpc-port)
+		shift
+		export DAPP_TESTNET_RPC_PORT=$1
+		;;
+	--rpc-addr)
+		shift
+		export DAPP_TESTNET_RPC_ADDRESS=$1
+		;;
+	--chain-id)
+		shift
+		export DAPP_TESTNET_CHAINID=$1
+		;;
+	--period)
+		shift
+		export DAPP_TESTNET_PERIOD=$1
+		;;
+	--accounts)
+		shift
+		export DAPP_TESTNET_ACCOUNTS=$(($1 - 1))
+		;;
+	--save)
+		shift
+		export DAPP_TESTNET_SAVE=$1
+		;;
+	--load)
+		shift
+		export DAPP_TESTNET_LOAD=$1
+		;;
+	--dir)
+		shift
+		export DAPP_TESTNET_gethdir=$1
+		;;
 
-
-    *) printf "${0##*/}: internal error: %q\\n" "$1"; exit 1
-  esac; shift
+	\
+		*)
+		printf "${0##*/}: internal error: %q\\n" "$1"
+		exit 1
+		;;
+	esac
+	shift
 done
 
 if ! [ -x "$(command -v "${0##*/}-${1-help}")" ]; then
-    # look for approximate matches
-    echo >&2 "'$1' is not a dapp command. See 'dapp help'."
-    echo >&2
-    echo >&2 "Most similar commands:"
-    find "${0%dapp}" -execdir echo {} ';' | agrep -1 "${0##*/}-${1-help}" >&2
-    exit 1
+	# look for approximate matches
+	echo >&2 "'$1' is not a dapp command. See 'dapp help'."
+	echo >&2
+	echo >&2 "Most similar commands:"
+	find "${0%dapp}" -execdir echo {} ';' | agrep -1 "${0##*/}-${1-help}" >&2
+	exit 1
 fi
 
 "${0##*/}-${1-help}" "${@:2}"

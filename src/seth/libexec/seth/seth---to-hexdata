@@ -11,22 +11,22 @@
 set -e
 
 if [[ $# = 0 ]]; then
-  set -- "$(cat)"
+	set -- "$(cat)"
 elif [[ $# != 1 ]]; then
-  seth --fail-usage "$0"
+	seth --fail-usage "$0"
 fi
 
 if [[ $1 = @* ]]; then
-  value=$(seth lookup "$1")
-  "$0" "$value"
+	value=$(seth lookup "$1")
+	"$0" "$value"
 elif [[ $1 =~ / ]]; then
-  "$0" <"$1"
+	"$0" <"$1"
 elif [[ $1 =~ ^0x[[:xdigit:]]*$ ]]; then
-  tr A-F a-f <<<"$1"
+	tr A-F a-f <<<"$1"
 elif [[ $1 =~ ^[[:xdigit:]]+$ ]]; then
-  echo "0x$(tr A-F a-f <<<"$1")"
+	echo "0x$(tr A-F a-f <<<"$1")"
 elif [[ $1 =~ ^(0x[[:xdigit:]]*:)+0x[[:xdigit:]]*$ ]]; then
-  echo "0x$(sed -E -e 's/(^0x|:0x)//g' <<<"$1" | tr A-F a-f)"
+	echo "0x$(sed -E -e 's/(^0x|:0x)//g' <<<"$1" | tr A-F a-f)"
 else
-  seth --fail "${0##*/}: error: invalid hexdata: \`$1'"
+	seth --fail "${0##*/}: error: invalid hexdata: \`$1'"
 fi

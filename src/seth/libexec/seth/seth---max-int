@@ -3,4 +3,4 @@
 ### Usage: seth --max-int [<bits>]
 set -e
 [[ $1 ]] && bits=$1 || bits=256
-echo "0x$(bc <<< "obase=16; 2^$bits / 2 - 1" | tr A-F a-f)"
+echo "0x$(bc <<<"obase=16; 2^$bits / 2 - 1" | tr A-F a-f)"

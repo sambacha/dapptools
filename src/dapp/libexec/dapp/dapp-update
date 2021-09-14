@@ -3,7 +3,13 @@
 ### Usage: dapp update [<lib>]
 set -e
 if [[ $1 ]]; then
-  for x; do (set -x; git submodule update --init --recursive "lib/$x"); done
+	for x; do (
+		set -x
+		git submodule update --init --recursive "lib/$x"
+	); done
 else
-  (set -x; git submodule update --init --recursive)
+	(
+		set -x
+		git submodule update --init --recursive
+	)
 fi

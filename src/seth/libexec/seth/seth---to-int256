@@ -4,4 +4,4 @@
 set -e
 [[ $1 ]] || set -- "$(cat)"
 export BC_LINE_LENGTH=100
-seth --to-uint256 "$(bc <<< "(2^256 * ($1 < 0)) + $1")"
+seth --to-uint256 "$(bc <<<"(2^256 * ($1 < 0)) + $1")"

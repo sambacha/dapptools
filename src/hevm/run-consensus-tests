@@ -7,8 +7,8 @@ set -e
 HEVM=${HEVM:-hevm}
 
 if [[ "$#" -lt 1 ]]; then
-  echo >&2 "usage: $(basename "$0") <tests-dir>"
-  exit 1
+	echo >&2 "usage: $(basename "$0") <tests-dir>"
+	exit 1
 fi
 
 tests=$1
@@ -18,7 +18,7 @@ skip=$4
 timeout=${5:-10}
 
 _html() {
-cat <<.
+	cat <<.
 <!doctype html>
 <title>hevm test results</title>
 <style>
@@ -65,46 +65,47 @@ $(echo $passed)
 }
 
 {
-  cd "$tests"
-  for x in VMTests/*/*; do
-    if [[ $x =~ .*$match.* ]] && [[ -n $skip && $x =~ .*$skip.* ]]; then
-      for job in $(<$x jq '.|keys[]' -r); do
-        echo "$x $job skip"
-      done
-    elif [[ $x =~ .*$match.* ]]; then
-      echo -n "$x " ; "$HEVM" vm-test --file $x --timeout $timeout 2>&1
-    fi
-  done
+	cd "$tests"
+	for x in VMTests/*/*; do
+		if [[ $x =~ .*$match.* ]] && [[ -n $skip && $x =~ .*$skip.* ]]; then
+			for job in $(jq <$x '.|keys[]' -r); do
+				echo "$x $job skip"
+			done
+		elif [[ $x =~ .*$match.* ]]; then
+			echo -n "$x "
+			"$HEVM" vm-test --file $x --timeout $timeout 2>&1
+		fi
+	done
 } | {
-  while read path test outcome; do
-    echo >&2 "$path $test $outcome"
-    category=$(dirname "$path")
-    testcase=$(basename "${path%.json}")
-    row="<tr><td class=testcase>$testcase<td>$outcome<td class=category>$category"
-    row+=$'\n'
-    case $outcome in
-      ok)      passed+=$row ;;
-      skip)    skipped+=$row ;;
-      timeout) timouts+=row ;;
-      *)       failed+=$row ;;
-    esac
-  done
+	while read path test outcome; do
+		echo >&2 "$path $test $outcome"
+		category=$(dirname "$path")
+		testcase=$(basename "${path%.json}")
+		row="<tr><td class=testcase>$testcase<td>$outcome<td class=category>$category"
+		row+=$'\n'
+		case $outcome in
+		ok) passed+=$row ;;
+		skip) skipped+=$row ;;
+		timeout) timouts+=row ;;
+		*) failed+=$row ;;
+		esac
+	done
 
-  sum () { echo -ne "$1" | wc -l | awk '{print $1}'; }
+	sum() { echo -ne "$1" | wc -l | awk '{print $1}'; }
 
-  nfail=$(sum "$failed")
-  npass=$(sum "$passed")
-  nskip=$(sum "$skipped")
-  ntime=$(sum "$timeouts")
+	nfail=$(sum "$failed")
+	npass=$(sum "$passed")
+	nskip=$(sum "$skipped")
+	ntime=$(sum "$timeouts")
 
-  echo >&2 "passed: $npass"
-  echo >&2 "failed: $nfail"
-  echo >&2 "timeout: $ntime"
-  echo >&2 "skipped: $nskip"
+	echo >&2 "passed: $npass"
+	echo >&2 "failed: $nfail"
+	echo >&2 "timeout: $ntime"
+	echo >&2 "skipped: $nskip"
 
-  if [[ $html == "True" ]]; then
-    _html
-  fi
+	if [[ $html == "True" ]]; then
+		_html
+	fi
 
-  [[ $nfail -gt 0 ]] && exit 1 || exit 0
+	[[ $nfail -gt 0 ]] && exit 1 || exit 0
 }

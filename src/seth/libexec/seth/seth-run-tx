@@ -13,35 +13,38 @@ set -e
 # if the argument begins with 0x, we assume it to be a tx hash
 # otherwise, we assume that it contains the result of a seth tx call
 if [[ $1 = 0x* ]]; then
-  tx=$(seth tx "$1")
+	tx=$(seth tx "$1")
 elif [[ $1 = blockHash* ]]; then
-  tx=$1
+	tx=$1
 else
-  seth --fail "${0##*/}: malformed transaction hash or data: $1"
+	seth --fail "${0##*/}: malformed transaction hash or data: $1"
 fi
 
-TO=$(<<< "$tx" seth --field to)
-DATA=$(<<< "$tx" seth --field input | seth --to-hex)
+TO=$(seth <<<"$tx" --field to)
+DATA=$(seth <<<"$tx" --field input | seth --to-hex)
 if [[ "$TO" == 'null' ]]; then
-  opts+=(--create --code "$DATA")
+	opts+=(--create --code "$DATA")
 else
-  opts+=(--address "$TO" --calldata "$DATA")
+	opts+=(--address "$TO" --calldata "$DATA")
 fi
 
-opts+=(--caller "$(<<< "$tx" seth --field from)" )
-opts+=(--origin "$(<<< "$tx" seth --field from)")
-opts+=(--value  "$(<<< "$tx" seth --field value)")
-opts+=(--gas    "$(<<< "$tx" seth --field gas)")
-opts+=(--nonce  "$(<<< "$tx" seth --field nonce)")
-opts+=(--number "$(<<< "$tx" seth --field blockNumber)")
-opts+=(--block  "$(("$(<<< "$tx" seth --field blockNumber)" - 1))")
-opts+=(--rpc    "${ETH_RPC_URL}")
-opts+=(--timestamp "${HEVM_TIMESTAMP:-$(seth block "$(<<< "$tx" seth --field blockNumber)" timestamp)}")
-opts+=(--chainid   "${ETH_CHAINID:-$(seth rpc eth_chainId | seth --to-dec)}")
+opts+=(--caller "$(seth <<<"$tx" --field from)")
+opts+=(--origin "$(seth <<<"$tx" --field from)")
+opts+=(--value "$(seth <<<"$tx" --field value)")
+opts+=(--gas "$(seth <<<"$tx" --field gas)")
+opts+=(--nonce "$(seth <<<"$tx" --field nonce)")
+opts+=(--number "$(seth <<<"$tx" --field blockNumber)")
+opts+=(--block "$(("$(seth <<<"$tx" --field blockNumber)" - 1))")
+opts+=(--rpc "${ETH_RPC_URL}")
+opts+=(--timestamp "${HEVM_TIMESTAMP:-$(seth block "$(seth <<<"$tx" --field blockNumber)" timestamp)}")
+opts+=(--chainid "${ETH_CHAINID:-$(seth rpc eth_chainId | seth --to-dec)}")
 
 [[ "$HEVM_STATE" ]] && opts+=(--state "$HEVM_STATE")
 [[ "$HEVM_DEBUG" ]] && opts+=(--debug)
 [[ "$HEVM_TRACE" ]] && opts+=(--trace)
-[[ "$DAPP_JSON" ]]  && opts+=(--json-file "$DAPP_JSON")
+[[ "$DAPP_JSON" ]] && opts+=(--json-file "$DAPP_JSON")
 
-([[ $SETH_VERBOSE ]] && set -x; hevm exec "${opts[@]}")
+(
+	[[ $SETH_VERBOSE ]] && set -x
+	hevm exec "${opts[@]}"
+)

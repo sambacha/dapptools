@@ -4,8 +4,8 @@ set -e
 version=$(jshon --version)
 min=20131105
 if [[ $version -lt $min ]]; then
-  echo >&2 "${0##*/}: error: jshon $version is too old (need $min or newer)"
-  exit 1
+	echo >&2 "${0##*/}: error: jshon $version is too old (need $min or newer)"
+	exit 1
 fi
 
 rpc-result() { jshon -Q -e result -j; }
@@ -15,13 +15,14 @@ request=$(seth rpc-request -- "$@")
 response=$(seth rpc-curl <<<"$request")
 
 if result=$(rpc-result <<<"$response"); then
-  seth --show-json <<<"$result"
+	seth --show-json <<<"$result"
 elif error=$(rpc-error <<<"$response"); then
-  { echo "$request"
-    SETH_KEY_WIDTH=10 seth --show-json <<<"$error" | sed 's/^/error:   /'
-  } | sed >&2 "s/^/${0##*/}: /"
-  exit 1
+	{
+		echo "$request"
+		SETH_KEY_WIDTH=10 seth --show-json <<<"$error" | sed 's/^/error:   /'
+	} | sed >&2 "s/^/${0##*/}: /"
+	exit 1
 else
-  echo >&2 "$response"
-  exit 1
+	echo >&2 "$response"
+	exit 1
 fi
